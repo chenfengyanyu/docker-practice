@@ -1,0 +1,9 @@
+在项目根目录下，创建.dockerignore文件，内容如下：
+
+node_modules 
+npm-debug.log 
+.nuxt 
+.vscode 
+.git 
+.DS_Store 
+.sentryclirc

@@ -1,0 +1,1 @@
+docker build -t go/app:v1 -f Dockerfile .

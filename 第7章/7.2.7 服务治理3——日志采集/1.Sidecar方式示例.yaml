@@ -1,0 +1,153 @@
+apiVersion: extensions/v1test1
+kind: Deployment
+metadata:
+  labels:
+    app: step
+    environment: test
+  name: step7
+  namespace: step7
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: step7
+      environment: test
+  template:
+    metadata:
+      labels:
+        app: step7
+        environment: test
+    spec:
+      containers:
+      - env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: JAVA_TOOL_OPTIONS
+          value: -XX:MaxRAMPercentage=50.0 -XX:InitialRAMPercentage=50.0 -XX:MinRAMPercentage=50.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+        image: harbor.dockerstep7.com/library/demo:step7-20210711120112
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          successThreshold: 1
+          tcpSocket:
+            port: 8091
+          timeoutSeconds: 1
+        name: step7
+        ports:
+        - containerPort: 8091
+          name: 8091tcp2
+          protocol: TCP
+        - containerPort: 8099
+          name: 8099tcp2
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 8091
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: "4"
+            memory: 8096Mi
+          requests:
+            cpu: "4"
+            memory: 8096Mi
+        volumeMounts:
+        - mountPath: /etc/localtime
+          name: tz-config
+        - mountPath: /apps/srv/instance/logs/
+          name: app-volume
+        - mountPath: /apps/srv/apm/agent/
+          name: pinpoint-agent-volume
+      - env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: harbor.dockerstep7.com/library/filebeat:7.3.0
+        imagePullPolicy: IfNotPresent
+        name: filebeat
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/localtime
+          name: tz-config
+        - mountPath: /apps/srv/instance/logs/
+          name: app-volume
+        - mountPath: /usr/share/filebeat/filebeat.yml
+          name: filebeat-config-volume
+          subPath: filebeat.yml
+        - mountPath: /usr/share/filebeat/inputs.d/filebeat-inputs.yml
+          name: filebeat-config-volume
+          subPath: filebeat-inputs.yml
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: harbor-secret
+      initContainers:
+      - command:
+        - cp
+        - -r
+        - /pinpoint-agent-2.1.0
+        - /apps/srv/apm/agent/
+        image: harbor.dockerstep7.com/library/pinpoint:2.1.0-init
+        imagePullPolicy: IfNotPresent
+        name: multi-test-agent
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /apps/srv/apm/agent/
+          name: pinpoint-agent-volume
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsUser: 0
+      terminationGracePeriodSeconds: 85
+      volumes:
+      - hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: ""
+        name: tz-config
+      - emptyDir: {}
+        name: app-volume
+      - configMap:
+          defaultMode: 420
+          name: step7-filebeat-config
+        name: filebeat-config-volume
+      - emptyDir: {}
+        name: pinpoint-agent-volume

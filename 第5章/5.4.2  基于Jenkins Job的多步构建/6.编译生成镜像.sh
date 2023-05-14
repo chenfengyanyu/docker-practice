@@ -1,0 +1,1 @@
+$ docker build -t go/app:v4 -f  Dockerfile.step  .

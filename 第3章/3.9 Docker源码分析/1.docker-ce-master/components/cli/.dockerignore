@@ -1,0 +1,7 @@
+/build/
+/cli/winresources/versioninfo.json
+/cli/winresources/*.syso
+/man/man*/
+/docs/yaml/gen/
+profile.out
+/vndr.log

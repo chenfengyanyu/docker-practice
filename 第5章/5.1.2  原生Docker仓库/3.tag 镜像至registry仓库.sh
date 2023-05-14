@@ -1,0 +1,1 @@
+docker image tag ubuntu localhost:5000/myfirstimage

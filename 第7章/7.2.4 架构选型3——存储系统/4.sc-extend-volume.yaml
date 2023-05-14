@@ -1,0 +1,13 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: gluster-volume
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: "http://172.16.10.100:8080"
+  restuser: ""
+  secretNamespace: ""
+  secretName: ""
+allowVolumeExpansion: true
+
+#kubectl edit pvc pvc-name -n namespace_name

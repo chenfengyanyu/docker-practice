@@ -1,0 +1,63 @@
+# apollo-compose
+
+version: '3.7'
+
+services:
+  apollo-configservice:
+    container_name: apollo-configservice
+    image: apolloconfig/apollo-configservice
+    volumes:
+      - type: volume
+        source: logs
+        target: /opt/logs
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://172.16.220.132:3306/ApolloConfigDB?characterEncoding=utf8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=apollo
+    restart: always
+
+  apollo-adminservice:
+    depends_on:
+      - apollo-configservice
+    container_name: apollo-adminservice
+    image: apolloconfig/apollo-adminservice
+    volumes:
+      - type: volume
+        source: logs
+        target: /opt/logs
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://172.16.220.132:3306/ApolloConfigDB?characterEncoding=utf8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=apollo
+    restart: always
+
+  apollo-portal:
+    depends_on:
+      - apollo-adminservice
+    container_name: apollo-portal
+    image: apolloconfig/apollo-portal
+    volumes:
+      - type: volume
+        source: logs
+        target: /opt/logs
+    ports:
+      - "8081:8070"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://172.16.220.132:3306/ApolloPortalDB?characterEncoding=utf8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=apollo
+      - APOLLO_PORTAL_ENVS=dev
+      - DEV_META=http://172.16.220.132:8080
+    restart: always
+
+volumes:
+  logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/logs

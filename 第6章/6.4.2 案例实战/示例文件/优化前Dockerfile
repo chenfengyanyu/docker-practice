@@ -1,0 +1,8 @@
+FROM acr.jartto.com/sre/pm2:4.4.0 as pm2 
+RUN mkdir -p /usr/share/nginx/ssr 
+RUN npm install -g pm2 
+COPY . /usr/share/nginx/ssr/ 
+WORKDIR /usr/share/nginx/ssr/ 
+ENV NODE_ENV test 
+CMD npm run start 
+EXPOSE 19888

@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -x
+set -e
+
+# untar sources
+mkdir -p /root/build-deb/engine
+tar -C /root/build-deb -xzf /sources/engine.tgz
+mkdir -p /root/build-deb/cli
+tar -C /root/build-deb -xzf /sources/cli.tgz
+mkdir -p /root/build-deb/scan-cli-plugin
+tar -C /root/build-deb -xzf /sources/scan-cli-plugin.tgz
+
+# link them to their canonical path
+mkdir -p /go/src/github.com/docker
+ln -snf /root/build-deb/engine /go/src/github.com/docker/docker
+ln -snf /root/build-deb/cli /go/src/github.com/docker/cli
+ln -snf /root/build-deb/scan-cli-plugin /go/src/github.com/docker/scan-cli-plugin
+
+EPOCH="${EPOCH:-}"
+EPOCH_SEP=""
+if [[ ! -z "$EPOCH" ]]; then
+	EPOCH_SEP=":"
+fi
+
+if [[ -z "$DEB_VERSION" ]]; then
+	echo "DEB_VERSION is required to build deb packages"
+	exit 1
+fi
+
+echo VERSION AAA $VERSION
+
+VERSION=${VERSION:-$(cat cli/VERSION)}
+
+echo VERSION bbb $VERSION
+
+debSource="$(awk -F ': ' '$1 == "Source" { print $2; exit }' debian/control)"
+debMaintainer="$(awk -F ': ' '$1 == "Maintainer" { print $2; exit }' debian/control)"
+debDate="$(date --rfc-2822)"
+
+cat > "debian/changelog" <<-EOF
+$debSource (${EPOCH}${EPOCH_SEP}${DEB_VERSION}-0~${DISTRO}-${SUITE}) $SUITE; urgency=low
+  * Version: $VERSION
+ -- $debMaintainer  $debDate
+EOF
+# The space above at the start of the line for the debMaintainer is very important
+
+# Give the script a git commit because it wants it
+export CLI_GITCOMMIT=${CLI_GITCOMMIT-$(cd cli; $GIT_COMMAND rev-parse --short HEAD)}
+export ENGINE_GITCOMMIT=${ENGINE_GITCOMMIT-$(cd engine; $GIT_COMMAND rev-parse --short HEAD)}
+
+# Scan plugin
+export SCAN_GITCOMMIT=${SCAN_GITCOMMIT-$(cd scan-cli-plugin; $GIT_COMMAND rev-parse --short HEAD)}
+
+echo VERSION BBB $VERSION
+dpkg-buildpackage -uc -us -I.git
+destination="/build"
+mkdir -p "$destination"
+mv -v /root/docker* "$destination"

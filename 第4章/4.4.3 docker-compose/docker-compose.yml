@@ -1,0 +1,33 @@
+version: '3' 
+services: 
+ zookeeper1: 
+ image: zookeeper:3.4 
+ container_name: zookeeper1 
+ restart: always 
+ hostname: zookeeper1 
+ ports: 
+ - "2181:2181" 
+ environment: 
+ ZOO_MY_ID: 1 
+ ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=zookeeper2:2888:3888 
+ Zookeeper2: 
+ image: zookeeper:3.4 
+ container_name: zookeepe2 
+ restart: always 
+ hostname: zookeeper2 
+ ports: 
+ - "2182:2181" 
+ environment: 
+ ZOO_MY_ID: 2 
+ ZOO_SERVERS: server.1=zookeeper1:2888:3888 server.2=0.0.0.0:2888:3888 
+ dubbo-admin: 
+ image: dubbo-admin:1.0 
+ container_name: dubbo-admin 
+ links: 
+ - zookeeper:zk #配置容器别名
+ depends_on: 
+ - zookeeper1 
+ - zookeeper2 
+ ports: 
+ - 7001:7001 
+ restart: always

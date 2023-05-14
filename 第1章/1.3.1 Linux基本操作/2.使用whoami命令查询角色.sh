@@ -1,0 +1,5 @@
+#whoami
+root
+
+#pwd
+/root

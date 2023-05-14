@@ -1,0 +1,2 @@
+$ cat /data/jenkins/secrets/initialAdminPassword
+ec7f1bcd51c8450c887fe2a59a6a6b4f

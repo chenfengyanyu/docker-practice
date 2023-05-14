@@ -1,0 +1,1 @@
+kubectl exec -it redis-cluster-0 -- redis-cli cluster info

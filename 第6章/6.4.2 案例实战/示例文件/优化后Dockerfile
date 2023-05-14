@@ -1,0 +1,11 @@
+FROM harbor.jartto.com/library/node:10.22.0-alpine3.11 
+RUN mkdir -p /usr/share/nginx/ssr 
+WORKDIR /usr/share/nginx/ssr/ 
+COPY package.json package-lock.json /usr/share/nginx/ssr/ 
+RUN npm i --registry=http://npm.jartto.com --production --unsafe-perm=true --allow-root && \ 
+    npm run build:test && \ 
+    npm cache clean --force 
+FROM scratch 
+COPY --from=0 . /usr/share/nginx/ssr/ 
+CMD [ "npm", "run", "start" ] 
+EXPOSE 19888

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-ingress-lb
+  namespace: nginx-ingress
+  labels:
+    app: nginx-ingress-lb
+  annotations:
+    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet
+    service.beta.kubernetes.io/alicloud-loadbalancer-id: <YOUR_INTRANET_SLB_ID>
+service.beta.kubernetes.io/alicloud-loadbalancer-force-override-listeners: 'true'
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: "Cluster"
+  ports:
+  - port: 80
+    name: http
+    targetPort: 80
+  - port: 443
+    name: https
+    targetPort: 443
+  selector:
+    app: ingress-nginx

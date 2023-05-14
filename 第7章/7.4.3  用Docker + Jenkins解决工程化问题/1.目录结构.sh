@@ -1,0 +1,19 @@
+.
+├── MP_verify_ovpbcG7KE0uwwiR1.txt
+├── README.md
+├── api
+├── assets
+├── components
+├── docker
+├── layouts
+├── middleware
+├── mixins
+├── node_modules
+├── nuxt.config.js
+├── package-lock.json
+├── package.json
+├── pages
+├── plugins
+├── static
+├── store
+└── util

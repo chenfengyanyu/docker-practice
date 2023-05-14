@@ -1,0 +1,15 @@
+version: '3'
+services:
+  mysql:
+    restart: always
+    image: mysql:5.7.16
+    container_name: mysql
+    volumes:
+      - ./mydir:/mydir
+      - ./datadir:/var/lib/mysql
+      - ./conf/my.cnf:/etc/my.cnf
+    environment:
+      - "MYSQL_ROOT_PASSWORD=apollo"
+      - "TZ=Asia/Shanghai"
+    ports:
+      - 3306:3306

@@ -1,0 +1,1 @@
+docker run -dt golang:1.8.3 /bin/sh

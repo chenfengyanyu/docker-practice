@@ -1,0 +1,40 @@
+// 配置自动构建时间及操作界面选项
+triggers {
+pollSCM('H/30 * * * *')
+}
+parameters {
+    choice name: 'action', choices: ['构建和部署', '构建', '部署', '重启', '回滚'], description: '部署动作'
+    }
+
+
+// 切出隔离分支
+stage('CheckOut') {
+            steps {
+                script {
+                    try {
+                        doCheckout(env.BRANCH_NAME, env.GIT_URL)
+                    } catch (e) {
+                        error e.getMessage()
+                    }
+                }
+            }
+        }
+
+// 获取项目中的Dockerfile文件并打包镜像
+stage('Build Image') {
+            steps {
+                container('docker') {
+                    withCredentials([usernamePassword(credentialsId: HARBOR_CREDENTIALSID, passwordVariable: 'password', usernameVariable: 'username')]) {
+                        script {
+                            try {
+                                sh "docker login harbor.jartto.com -u $username -p $password"
+                                sh "docker build -t harbor.jartto.com/gaotu/${APP_NAME}: ${CLEANUP_VERSION}-${BUILD_TIME} -f docker/node.Dockerfile ."
+                                sh "docker build -t harbor.jartto.com/gaotu/${APP_NAME}-static: ${CLEANUP_VERSION}-${BUILD_TIME} -f docker/static.Dockerfile ."
+                            } catch (e) {
+                                error e.getMessage()
+                            }
+                        }
+                    }
+                }
+            }
+        }

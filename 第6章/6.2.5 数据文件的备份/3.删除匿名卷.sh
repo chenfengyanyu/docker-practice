@@ -1,0 +1,1 @@
+docker run --rm -v /foo -v awesome:/bar busybox top

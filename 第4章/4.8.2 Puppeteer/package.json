@@ -1,0 +1,14 @@
+{
+    "name": "4-8-2-puppeteer",
+    "version": "1.0.0",
+    "description": "puppeteer 自动化测试",
+    "main": "index.js",
+    "scripts": {
+        "test": "node index.js"
+    },
+    "author": "stormlu",
+    "license": "ISC",
+    "dependencies": {
+        "puppeteer": "^13.5.1"
+    }
+}
